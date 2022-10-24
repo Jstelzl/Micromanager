@@ -21,7 +21,7 @@ CREATE TABLE role(
 );
 
 INSERT INTO role(title, salary, department_id)
-VALUES ("Lead Engineer", 130000, 2), ("Softwar Engineer", 120000, 2), ("Sales Lead", 100000, 1), ("Sales Person", 80000, 1) ("Legal Team Lead", 250000, 4), ("Lawer", 190000, 4), ("Accountant", 125000, 3);
+VALUES ("Lead Engineer", 230000, 2), ("Softwar Engineer", 160000, 2), ("Sales Lead", 100000, 1), ("Sales Person", 80000, 1) ("Legal Team Lead", 350000, 4), ("Lawer", 300000, 4), ("Accountant", 135000, 3);
     
 CREATE TABLE employee (
     id INT AUTO_INCREMENT,
