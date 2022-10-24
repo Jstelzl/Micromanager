@@ -24,11 +24,38 @@ const getManager = () => {
 };
 
 const getRole = () => {
-
+    connection.query(`SELECT title, role_id FROM role`, (err, res) => {
+        if (err) throw err;
+        roles = [];
+        for (let i = 0; i < res.length; i++) {
+            const id = res[i].role_id;
+            const title = res[i].title;
+            var newRole = {
+                name: title,
+                value: id
+            }
+            roles.push(newRole)
+        }
+        return roles;
+    });
 };
 
 const getEmployee = () => {
-
+    connection.query(`SELECT first_name, last_name, id FROM employees`, (err, res) => {
+        if (err) throw err;
+        roles = [];
+        for (let i = 0; i < res.length; i++) {
+            const id = res[i].id;
+            const firstName = res[i].first_name;
+            const lastName = res[i].last_name;
+            var newEmployee = {
+                name: title,
+                value: id
+            }
+            roles.push(newEmployee)
+        }
+        return roles;
+    });
 };
 
 const init = () => {
