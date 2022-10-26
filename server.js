@@ -270,7 +270,28 @@ const updateEmployeeRole = () => {
 };
 
 const updateEmployeeManager = () => {
-
+    inquirer
+        .prompt([
+            {
+                type: 'list',
+                name: 'employee',
+                message: 'Which employee is getting a new manager?',
+                choices: employees
+            },
+            {
+                type: 'list',
+                name: 'manager',
+                message: 'Who is your new manager?',
+                choices: managers
+            }
+        ]).then((answer) => {
+            connection.query(`UPDATE employee
+            SET manager_id = ${answer.manager}
+            WHERE id = ${answer.employee}`, (err, res) => {
+                if (err) throw err;
+                init()
+            })
+        })
 };
 
 
