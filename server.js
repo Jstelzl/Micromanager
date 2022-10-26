@@ -1,6 +1,5 @@
-const mysql = require('mysel');
 const inquirer = require('inquirer');
-//const consoleTable = require('console.table');
+const consoleTable = require('console.table');
 
 var managers = [];
 var roles = [];
@@ -13,7 +12,7 @@ const getManager = () => {
         for (let i = 0; i < res.lenth; i++) {
             const manager = res[i].manager;
             const manager_id = res[i].manager;
-            var newManager = {
+            let newManager = {
                 name: manager,
                 value: manager_id
             }
@@ -89,28 +88,37 @@ const init = () => {
         .then((answer) => {
             switch (answer.init) {
                 case 'View All Employees':
-                    ViewAllEmployees();
+                    viewAllEmployees();
                     break;
                 case 'View All Employees By Department':
-                    ViewAllEmployeesByDepartment();
+                    viewAllEmployeesByDepartment();
                     break;
                 case 'View All Employees by Manager':
-                    ViewAllEmployeesbyManager();
+                    viewAllEmployeesbyManager();
+                    break;
+                case 'Add Employee':
+                    addEmployee();
+                    break;
+                case 'Remove Emplyee':
+                    removeEmployee();
+                    break;
+                case 'Update Employee Role':
+                    updateEmployeeRole();
                     break;
             }
         })
 };
 
-const ViewAllEmployees = () => {
+const viewAllEmployees = () => {
     connection.query(roleCheck, (err, res) => {
         console.log("\nAll EMPLOYEES\n");
         if (err) throw err;
-        console.log(res);
+        console.table(res);
         init
     })
 };
 
-const ViewAllEmployeesByDepartment = () => {
+const viewAllEmployeesByDepartment = () => {
     inquirer
         .prompt({
             type: 'rawlist',
@@ -153,13 +161,26 @@ const ViewAllEmployeesByDepartment = () => {
         });
 };
 
-ViewAllEmployeesByManager = () => {
-
+const viewAllEmployeesbyManager = () => {
+    inquirer
+        .prompt({
+            type: 'list',
+            name: 'manager',
+            message: 'Choose a manager from the list.',
+            choices: managers
+        }).then((answer) => {
+            connection.query(`SELECT frist_name, last_name FROM employee
+            WHERE manager_id = ${answer.manager}:`, (err, res) => {
+                if (err) throw err;
+                console.table(res);
+                init();
+            })
+        })
 };
 
 
 
-addEmployee = () => {
+const addEmployee = () => {
     managers.push('none');
     inquirer
         .prompt([
@@ -200,6 +221,22 @@ addEmployee = () => {
                     init();
                 })
             }
+        })
+};
+
+const removeEmployee = () => {
+    inquirer
+        .prompt({
+            type: 'list',
+            name: 'employee',
+            message: 'Which employee would you like to romve?',
+            choices: employees
+        }).then((answer) => {
+            connection.query(`DELETE FROM employee WHERE id=${answer.employee}`, (err, res) => {
+                if (err) throw err;
+                init();
+            })
+            console.log(answer);
         })
 };
 
