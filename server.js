@@ -108,6 +108,9 @@ const init = () => {
                 case 'Update Employee Manager':
                     updateEmployeeManager();
                     break;
+                case 'View All Roles':
+                    viewAllRoles();
+                    break;
             }
         })
 };
@@ -292,6 +295,15 @@ const updateEmployeeManager = () => {
                 init()
             })
         })
+};
+
+const viewAllRoles = () => {
+    connection.query(`SELECT title FROM role`, (err, res) => {
+        console.log('\nAll ROLES\n');
+        if (err) throw err;
+        console.table(res);
+        init();
+    })
 };
 
 
