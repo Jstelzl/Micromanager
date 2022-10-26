@@ -105,6 +105,9 @@ const init = () => {
                 case 'Update Employee Role':
                     updateEmployeeRole();
                     break;
+                case 'Update Employee Manager':
+                    updateEmployeeManager();
+                    break;
             }
         })
 };
@@ -238,6 +241,36 @@ const removeEmployee = () => {
             })
             console.log(answer);
         })
+};
+
+const updateEmployeeRole = () => {
+    inquirer
+        .prompt([
+
+            {
+                type: 'list',
+                name: 'employee',
+                message: "Who's role are we updating?",
+                choices: employees
+            },
+            {
+                type: 'list',
+                name: 'role',
+                message: 'What will be their new role?',
+                choices: roles
+            }
+        ]).then((answer) => {
+            connection.query(`UPDATE employee
+            SET role_id = ${answer.role}
+            WHERE id = ${answer.employee};`, (err, res) => {
+                if (err) throw err;
+                init();
+            })
+        })
+};
+
+const updateEmployeeManager = () => {
+
 };
 
 
