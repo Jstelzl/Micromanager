@@ -1,31 +1,12 @@
-// GIVEN a command-line application that accepts user input
-// WHEN I start the application
-// THEN I am presented with the following options: view all departments, view all roles, view all employees, add a department, add a role, add an employee, and update an employee role
-// WHEN I choose to view all departments
-// THEN I am presented with a formatted table showing department names and department ids
-// WHEN I choose to view all roles
-// THEN I am presented with the job title, role id, the department that role belongs to, and the salary for that role
-// WHEN I choose to view all employees
-// THEN I am presented with a formatted table showing employee data, including employee ids, first names, last names, job titles, departments, salaries, and managers that the employees report to
-// WHEN I choose to add a department
-// THEN I am prompted to enter the name of the department and that department is added to the database
-// WHEN I choose to add a role
-// THEN I am prompted to enter the name, salary, and department for the role and that role is added to the database
-// WHEN I choose to add an employee
-// THEN I am prompted to enter the employee’s first name, last name, role, and manager, and that employee is added to the database
-// WHEN I choose to update an employee role
-// THEN I am prompted to select an employee to update and their new role and this information is updated in the database
-// Mock-Up
-
 const inquirer = require('inquirer');
 const consoleTable = require('console.table');
 const connection = require('./config/connections');
-//const { QueryInterface } = require('sequelize');
 
-var managers = [];
-var roles = [];
+var managers = []
+var roles = []
 var employees = []
 
+// List of prompts
 const init = () => {
 
     inquirer
@@ -67,10 +48,11 @@ const init = () => {
                         name: 'Quit',
                         value: 'QUIT'
                     }
-    
+
                 ],
             }
         ])
+        // Switch case
         .then(res => {
             let choice = res.choice
             switch (choice) {
@@ -102,35 +84,41 @@ const init = () => {
         });
 };
 
+// View a table of all the employees: COMPLETED
 const viewAllEmployees = () => {
     connection.query(`SELECT employee.employee_id, employee.first_name, employee.last_name, role.title, department.name AS department,
-     role.salary, CONCAT(manager.first_name, '', manager.last_name) AS manager FROM employee LEFT JOIN role ON employee.role_id = role.id
+     role.salary, CONCAT(manager.first_name, '', manager.last_name) AS manager FROM employee 
+     LEFT JOIN role ON employee.role_id = role.id
      LEFT JOIN department ON role.department_id = department.id
-     LEFT JOIN employee manager ON manager.employee_id = employee.manager_id;`)
-        //     , (err, res) => {
-        //     console.log("\nAll EMPLOYEES\n");
-        //     if (err) throw err;
-
-        // })
+     LEFT JOIN employee manager ON manager.employee_id = employee.manager_id;`
+        , (err, res) => {
+            console.log("\nAll EMPLOYEES\n");
+            if (err) throw err;
+        })
         .then(([data]) => {
             console.table(data);
             init();
         })
-        
+
 };
 
+// View a table of all departments: COMPLETED
 function viewDepartments() {
     //query to view all departments
-    const query = connection.query("SELECT * FROM department", function (err, res) {
-        if (err) throw err
-        console.log("\n Department in database \n");
-        console.table(res);
-        init();
-    });
-  };
+    connection.query(`SELECT department.name, department.id 
+    FROM department;`
+        , (err, res) => {
+            console.log("\n Department in database \n");
+            if (err) throw err
+        })
+        .then(([data]) => {
+            console.table(data);
+            init();
+        })
+};
 
 
-
+// Add an employee to the employee table: INCOMPLETE
 const addEmployee = () => {
     managers.push('none');
     inquirer
@@ -142,13 +130,13 @@ const addEmployee = () => {
             },
             {
                 type: 'input',
-                name: 'first_name',
+                name: 'last_name',
                 message: 'What is your last name?'
             },
             {
-                type: 'input',
+                type: 'list',
                 name: 'role',
-                message: 'What if your role?',
+                message: 'What is your role?',
                 choices: roles
             },
             {
@@ -158,23 +146,24 @@ const addEmployee = () => {
                 choices: managers
             },
         ]).then((answer) => {
-            if (answer.manager === 'none') {
-                connection.query(`INSERT INTO employee(first_name, last_name, role_id)
-                Values ('${answer.first_name}', '${answer.last_name}', ${answer.role}, null)`, (err, res) => {
-                    if (err) throw err;
-                    init();
-                });
-            }
-            else {
-                connection.query(`INSERT INTO employee(first_name, last_name, role_id)
-                Values ('${answer.first_name}', ${answer.last_name}, ${answer.role}, ${answer.manager})`, (err, res) => {
-                    if (err) throw err;
-                    init();
-                })
-            }
+
+            connection.query(`INSERT INTO employee(first_name, last_name, role)
+                    values ('${answer.first_name}', '${answer.last_name}', ${answer.role}, NULL)`, (err, res) => {
+                if (err) throw err;
+                init();
+            })
+
+            // else {
+            //     connection.query(`INSERT INTO employee(first_name, last_name, role_id, manager_id)
+            //         values ('${answer.first_name}', ${answer.last_name}, ${answer.role}, ${answer.manager})`, (err, res) => {
+            //         if (err) throw err;
+            //         init();
+            //     })
+            // }
         })
 };
 
+// Update a role: INCOMPLETE
 const updateEmployeeRole = () => {
     inquirer
         .prompt([
@@ -192,27 +181,61 @@ const updateEmployeeRole = () => {
                 choices: roles
             }
         ]).then((answer) => {
-            connection.query(`UPDATE employee
-            SET role_id = ${answer.role}
-            WHERE id = ${answer.employee};`, (err, res) => {
+            connection.query(`UPDATE employee SET role_id = ${answer.role} 
+                WHERE id = ${answer.employee};`, (err, res) => {
                 if (err) throw err;
                 init();
             })
         })
 };
 
+// View a table of all roles: COMPLETED
 const viewAllRoles = () => {
-    connection.query(`SELECT title FROM role`, (err, res) => {
+    connection.query(`SELECT role.title, role.id, role.salary, department.name AS department 
+    FROM role LEFT JOIN department ON role.department_id = department.id;`, (err, res) => {
         console.log('\nALL ROLES\n');
         if (err) throw err;
-        console.table(res);
-        init();
     })
+        .then(([data]) => {
+            console.table(data);
+            init();
+        })
 };
 
+// Add a department: INCOMPLETE
 const addDepartment = () => {
-
+    inquirer
+        .prompt([
+            {
+                type: 'input',
+                name: 'department',
+                message: 'What is this department called?',
+            }
+        ])
+    connection.query(`INSERT INTO department(name)
+        VALUES ('${answer.name}');`
+        , (err, res) => {
+            console.log("\nADD_DEPARTMENT\n");
+            if (err) throw err;
+        })
+        .then(([data]) => {
+            console.table(data);
+            init();
+        })
 };
 
+// Add a role: INCOMPLETE
+const addRole = () => {
+    inquirer
+        .prompt([
+            {
+                type: 'input',
+                name: 'department',
+                message: 'What is this role called?',
+            }
+        ])
+        .then
+};
 
+// init caller
 init();
